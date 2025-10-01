@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>🎯 Roy 초성게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .game-setup {
+            margin-bottom: 30px;
+        }
+
+        .player-count {
+            margin-bottom: 20px;
+        }
+
+        .player-count label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .player-count select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            width: 200px;
+        }
+
+        .players-input {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .player-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .player-input label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .player-input input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .game-stat {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .game-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .game-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .challenge-area {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .challenge-text {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .challenge-hint {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .voice-area {
+            margin-bottom: 30px;
+        }
+
+        .mic-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            /* 터치 최적화 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            min-height: 60px;
+        }
+
+        .mic-button:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .mic-button.listening {
+            background: #dc3545;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .voice-status {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .recognition-result {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 54px;
+            border: 2px solid #e9ecef;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .player-claims {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .claim-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 14px 26px;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            font-weight: 700;
+            /* 터치 최적화 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            min-height: 50px;
+        }
+
+        .claim-btn:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .claim-btn.active {
+            background: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+
+        .answers-area {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .answers-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .answers-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .answer-item {
+            background: #28a745;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 22px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            border-left: 6px solid rgba(0,0,0,0); /* player color indicator */
+        }
+        /* Player color indicators for answers */
+        .answer-item.player-1 { border-left-color: #667eea; }
+        .answer-item.player-2 { border-left-color: #17a2b8; }
+        .answer-item.player-3 { border-left-color: #ffc107; }
+        .answer-item.player-4 { border-left-color: #dc3545; }
+        .answer-item.player-5 { border-left-color: #20c997; }
+        .answer-item.player-6 { border-left-color: #6f42c1; }
+
+        .scores-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .player-score {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .player-name {
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 1.1rem;
+        }
+
+        .player-points {
+            font-size: 1.8rem;
+            color: #667eea;
+            font-weight: 900;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .control-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .control-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .game-over {
+            display: none;
+            text-align: center;
+        }
+
+        .game-over h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .final-scores {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .final-score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .feedback.neutral {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        /* 정답/오답 하이라이트 효과 */
+        .recognition-result.correct { color: #28a745; border-color: #c3e6cb; animation: pop 250ms ease; }
+        .recognition-result.incorrect { color: #dc3545; border-color: #f5c6cb; animation: shake 350ms ease; }
+        .challenge-text.correct { color: #28a745 !important; animation: pop 250ms ease; }
+        .challenge-text.incorrect { color: #dc3545 !important; animation: shake 350ms ease; }
+        .answer-item.pop { animation: pop 250ms ease; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        
+        /* 리더보드 스타일 */
+        .leaderboard-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .leaderboard-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .leaderboard-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .leaderboard-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .close-leaderboard {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .leaderboard-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .leaderboard-rank {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .leaderboard-score {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        /* 태블릿 및 모바일 반응형 개선 */
+        @media (max-width: 1024px) {
+            .game-container {
+                padding: 20px;
+                margin: 15px;
+            }
+            
+            .challenge-text {
+                font-size: 3rem;
+            }
+            
+            .mic-button {
+                padding: 18px 35px;
+                font-size: 1.1rem;
+            }
+            
+            .claim-btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .challenge-text {
+                font-size: 2.5rem;
+            }
+            
+            .players-input {
+                grid-template-columns: 1fr;
+            }
+
+            .game-header {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .scores-area {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .player-claims {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .claim-btn {
+                width: 100%;
+                max-width: 200px;
+                margin-bottom: 5px;
+            }
+
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .control-btn {
+                width: 100%;
+                max-width: 200px;
+                margin-bottom: 10px;
+            }
+
+            .leaderboard-content {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .leaderboard-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+
+            .leaderboard-rank {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+                margin: 5px;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .challenge-text {
+                font-size: 2rem;
+            }
+
+            .mic-button {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+
+            .scores-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">🎯 Roy 초성게임</h1>
+            <p class="subtitle">음성으로 답하는 재미있는 초성게임</p>
+            <button class="leaderboard-btn" id="leaderboard-btn">🏆 리더보드</button>
+        </div>
+
+        <!-- 게임 설정 -->
+        <div class="game-setup" id="game-setup">
+            <div class="player-count">
+                <label for="player-count">플레이어 수를 선택하세요:</label>
+                        <select id="player-count">
+                            <option value="1">1명</option>
+                            <option value="2">2명</option>
+                            <option value="3">3명</option>
+                            <option value="4">4명</option>
+                        </select>
+                    </div>
+            
+            <div class="players-input" id="players-input">
+                <!-- 플레이어 입력 필드들이 동적으로 생성됩니다 -->
+            </div>
+            
+            <button class="start-btn" id="start-game">게임 시작</button>
+                    </div>
+
+        <!-- 게임 영역 -->
+        <div class="game-area" id="game-area">
+            <div class="game-header">
+                <div class="game-stat">
+                    <div class="game-stat-label">현재 초성</div>
+                    <div class="game-stat-value" id="current-challenge">ㅇㄱ</div>
+                    </div>
+                <div class="game-stat">
+                    <div class="game-stat-label">남은 시간</div>
+                    <div class="game-stat-value" id="time-left">60</div>
+                </div>
+                <div class="game-stat">
+                    <div class="game-stat-label">라운드</div>
+                    <div class="game-stat-value" id="current-round">1/5</div>
+            </div>
+        </div>
+
+            <div class="challenge-area">
+                <div class="challenge-text" id="challenge-display">ㅇㄱ</div>
+                <div class="challenge-hint">위 초성으로 시작하는 단어를 말해보세요!</div>
+                </div>
+
+            <div class="voice-area" id="voice-area">
+                <button class="mic-button" id="mic-button">
+                    🎤 음성인식 시작
+                </button>
+                <div class="voice-status" id="voice-status">마이크 버튼을 눌러 음성인식을 시작하세요</div>
+                
+                <div class="player-claims" id="player-claims" style="display: none;">
+                    <!-- 플레이어 버튼들이 동적으로 생성됩니다 -->
+                        </div>
+                
+                <div class="recognition-result" id="recognition-result">
+                    <!-- 음성인식 결과가 표시됩니다 -->
+                    </div>
+                </div>
+
+            <div class="answers-area">
+                <div class="answers-title">맞춘 단어들</div>
+                <div class="answers-list" id="answers-list">
+                    <!-- 맞춘 단어들이 표시됩니다 -->
+            </div>
+        </div>
+
+            <div class="scores-area" id="scores-area">
+                <!-- 플레이어 점수들이 표시됩니다 -->
+                </div>
+
+            <div class="game-controls">
+                <button class="control-btn secondary" id="next-round">다음 라운드</button>
+                <button class="control-btn secondary" id="end-game">게임 종료</button>
+                            </div>
+                        </div>
+
+        <!-- 게임 종료 -->
+        <div class="game-over" id="game-over">
+            <h2>🎉 게임 종료!</h2>
+            <div class="final-scores" id="final-scores">
+                <!-- 최종 점수가 표시됩니다 -->
+            </div>
+            <button class="start-btn" id="restart-game">새 게임 시작</button>
+        </div>
+
+        <!-- 리더보드 모달 -->
+        <div class="leaderboard-modal" id="leaderboard-modal">
+            <div class="leaderboard-content">
+                <div class="leaderboard-header">
+                    <h2 class="leaderboard-title">🏆 Top 플레이어</h2>
+                    <button class="close-leaderboard" id="close-leaderboard">✕</button>
+                    </div>
+                <div class="leaderboard-list" id="leaderboard-list">
+                    <!-- 리더보드 항목들이 여기에 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data/answers.js"></script>
+    <script>
+        class KoreanInitialGame {
+            constructor() {
+                this.players = [];
+                this.currentPlayerIndex = 0;
+                this.scores = {};
+                this.gameActive = false;
+                this.round = 1;
+                this.timeLeft = 60;
+                this.currentChallenge = '';
+                this.answeredWords = new Set();
+                this.recognition = null;
+                this.timer = null;
+                this.isListening = false;
+                this.selectedPlayerId = null;
+                
+                // 오디오 관련
+                this.bgmAudio = null;
+                this.correctSfx = null;
+                this.errorSfx = null;
+                this.bgmPlaylist = [
+                    'music/theme park_output_low.mp3',
+                    'music/zoo themepark3_output_low.mp3',
+                    'music/correct_output_low.mp3'
+                ];
+                this.currentBgmIndex = 0;
+                
+                // 리더보드 데이터
+                this.leaderboard = this.loadLeaderboard();
+                
+                // 초성 리스트
+                this.CHOSEONG_LIST = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+                
+                // 초성 패턴 풀
+                this.challengesPool = (window && window.CHALLENGE_KEYS) ? [...window.CHALLENGE_KEYS] : [
+                    'ㅇㄱ','ㄴㄹ','ㄱㅅ','ㅁㅅ','ㅂㅅ','ㅅㅇ','ㄷㅇ','ㅈㅇ','ㅊㅇ','ㅋㅇ',
+                    'ㅌㅇ','ㄴㅁ','ㄱㄷ','ㄱㄹ','ㄱㅈ','ㄹㄱ','ㅁㄱ','ㅅㅂ','ㅇㅅ','ㅈㅂ',
+                    'ㅎㅅ','ㅂㅇ','ㅊㅈ','ㄷㅅ','ㅁㄹ','ㅇㄴ','ㅈㄱ','ㅍㅅ','ㅋㅅ','ㄹㅁ'
+                ];
+                this.challenges = [];
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupSpeechRecognition();
+                this.setupAudio();
+                this.updatePlayerInputs();
+            }
+
+            setupEventListeners() {
+                document.getElementById('player-count').addEventListener('change', () => this.updatePlayerInputs());
+                document.getElementById('start-game').addEventListener('click', () => this.startGame());
+                document.getElementById('mic-button').addEventListener('click', () => this.toggleMic());
+                document.getElementById('next-round').addEventListener('click', () => this.nextRound());
+                document.getElementById('end-game').addEventListener('click', () => this.endGame());
+                document.getElementById('restart-game').addEventListener('click', () => this.restartGame());
+                document.getElementById('leaderboard-btn').addEventListener('click', () => this.showLeaderboard());
+                document.getElementById('close-leaderboard').addEventListener('click', () => this.hideLeaderboard());
+                document.getElementById('leaderboard-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'leaderboard-modal') {
+                        this.hideLeaderboard();
+                    }
+                });
+            }
+
+            setupAudio() {
+                // 효과음 로드
+                this.correctSfx = new Audio('effect/good.wav');
+                this.errorSfx = new Audio('effect/error.wav');
+                
+                // 배경음악 로드
+                this.loadBgm();
+            }
+
+            loadBgm() {
+                if (this.bgmAudio) {
+                    try { this.bgmAudio.pause(); } catch (_) {}
+                }
+                if (this.bgmPlaylist.length > 0) {
+                    this.bgmAudio = new Audio(this.bgmPlaylist[this.currentBgmIndex]);
+                    this.bgmAudio.loop = true;
+                    this.bgmAudio.volume = 0.3;
+                }
+            }
+
+            playBgm() {
+                if (this.bgmAudio) {
+                    try { this.bgmAudio.pause(); } catch (_) {}
+                    this.bgmAudio.currentTime = 0;
+                    this.bgmAudio.play().catch(() => {});
+                }
+            }
+
+            stopBgm() {
+                if (this.bgmAudio) {
+                    this.bgmAudio.pause();
+                }
+            }
+
+            changeBgm() {
+                this.currentBgmIndex = (this.currentBgmIndex + 1) % this.bgmPlaylist.length;
+                this.loadBgm();
+                this.playBgm();
+            }
+
+            playCorrectSfx() {
+                if (this.correctSfx) {
+                    this.correctSfx.currentTime = 0;
+                    this.correctSfx.play().catch(() => {});
+                }
+            }
+
+            playErrorSfx() {
+                if (this.errorSfx) {
+                    this.errorSfx.currentTime = 0;
+                    this.errorSfx.play().catch(() => {});
+                }
+            }
+
+            loadLeaderboard() {
+                const saved = localStorage.getItem('royGameLeaderboard');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveLeaderboard() {
+                localStorage.setItem('royGameLeaderboard', JSON.stringify(this.leaderboard));
+            }
+
+            addToLeaderboard(playerName, score) {
+                this.leaderboard.push({
+                    name: playerName,
+                    score: score,
+                    date: new Date().toLocaleDateString()
+                });
+                
+                // 점수순으로 정렬하고 상위 10명만 유지
+                this.leaderboard.sort((a, b) => b.score - a.score);
+                this.leaderboard = this.leaderboard.slice(0, 10);
+                
+                this.saveLeaderboard();
+            }
+
+            showLeaderboard() {
+                document.getElementById('leaderboard-modal').style.display = 'flex';
+                this.updateLeaderboardDisplay();
+            }
+
+            hideLeaderboard() {
+                document.getElementById('leaderboard-modal').style.display = 'none';
+            }
+
+            updateLeaderboardDisplay() {
+                const leaderboardList = document.getElementById('leaderboard-list');
+                leaderboardList.innerHTML = '';
+
+                if (this.leaderboard.length === 0) {
+                    leaderboardList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">아직 기록이 없습니다.</div>';
+                    return;
+                }
+
+                this.leaderboard.forEach((entry, index) => {
+                    const rank = index + 1;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-rank rank-${rank}">${medal} ${rank}위</div>
+                        <div class="leaderboard-name">${entry.name}</div>
+                        <div class="leaderboard-score">${entry.score}점</div>
+                    `;
+                    leaderboardList.appendChild(item);
+                });
+            }
+
+            setupSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'ko-KR';
+
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        document.getElementById('mic-button').classList.add('listening');
+                        document.getElementById('mic-button').textContent = '🎤 음성인식 중...';
+                        document.getElementById('voice-status').textContent = '말씀해주세요!';
+                    };
+
+                    this.recognition.onresult = async (event) => {
+                        let finalTranscript = '';
+                        
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                finalTranscript += event.results[i][0].transcript;
+                            }
+                        }
+                        
+                        if (finalTranscript.trim()) {
+                            this.showRecognitionResult(finalTranscript.trim());
+                            await this.checkAnswer(finalTranscript.trim());
+                        }
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        console.error('음성인식 오류:', event.error);
+                        this.showFeedback('음성인식 오류가 발생했습니다.', 'incorrect');
+                    };
+
+                    this.recognition.onend = () => {
+                        this.isListening = false;
+                        document.getElementById('mic-button').classList.remove('listening');
+                        document.getElementById('mic-button').textContent = '🎤 음성인식 시작';
+                        if (this.gameActive) {
+                            document.getElementById('voice-status').textContent = '음성인식이 종료되었습니다.';
+                        }
+                    };
+                } else {
+                    console.error('이 브라우저는 음성인식을 지원하지 않습니다.');
+                    this.showFeedback('이 브라우저는 음성인식을 지원하지 않습니다.', 'incorrect');
+                }
+            }
+
+            updatePlayerInputs() {
+                const playerCount = parseInt(document.getElementById('player-count').value);
+                const playersInput = document.getElementById('players-input');
+                playersInput.innerHTML = '';
+
+                for (let i = 1; i <= playerCount; i++) {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'player-input';
+                    playerDiv.innerHTML = `
+                        <label for="player-${i}">플레이어 ${i}</label>
+                        <input type="text" id="player-${i}" placeholder="이름을 입력하세요" value="플레이어${i}">
+                    `;
+                    playersInput.appendChild(playerDiv);
+                }
+            }
+
+            startGame() {
+                const playerCount = parseInt(document.getElementById('player-count').value);
+                this.players = [];
+                this.scores = {};
+
+                // 플레이어 정보 수집
+                for (let i = 1; i <= playerCount; i++) {
+                    const playerName = document.getElementById(`player-${i}`).value.trim();
+                    if (!playerName) {
+                        alert(`플레이어 ${i}의 이름을 입력해주세요.`);
+                        return;
+                    }
+                    this.players.push({ id: i, name: playerName });
+                    this.scores[i] = 0;
+                }
+
+                // 게임 초기화
+                this.gameActive = true;
+                this.round = 1;
+                this.timeLeft = 60;
+                this.answeredWords.clear();
+                this.selectedPlayerId = null;
+
+                // 라운드용 문제 세트 생성 (중복 없이 5개)
+                this.challenges = this.pickRandomChallenges(5);
+
+                // UI 전환
+                document.getElementById('game-setup').style.display = 'none';
+                document.getElementById('game-area').style.display = 'block';
+                document.getElementById('game-over').style.display = 'none';
+
+                // 멀티플레이어인 경우 플레이어 버튼 표시
+                if (this.players.length > 1) {
+                    this.renderPlayerButtons();
+                    document.getElementById('player-claims').style.display = 'flex';
+                }
+
+                this.nextChallenge();
+                this.startTimer();
+                this.updateDisplay();
+                
+                // 배경음악 시작
+                this.playBgm();
+            }
+
+            pickRandomChallenges(count) {
+                const pool = [...this.challengesPool];
+                const picked = [];
+                while (pool.length && picked.length < count) {
+                    const idx = Math.floor(Math.random() * pool.length);
+                    picked.push(pool.splice(idx, 1)[0]);
+                }
+                return picked;
+            }
+
+            nextChallenge() {
+                if (this.round <= 5) {
+                    this.currentChallenge = this.challenges[this.round - 1];
+                    this.answeredWords.clear();
+                    this.updateDisplay();
+                } else {
+                    this.endGame();
+                }
+            }
+
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    document.getElementById('time-left').textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.nextRound();
+                    }
+                }, 1000);
+            }
+
+            nextRound() {
+                clearInterval(this.timer);
+                this.round++;
+                
+                if (this.round <= 5) {
+                    // 라운드 변경 시 배경음악 변경
+                    this.changeBgm();
+                    this.nextChallenge();
+                    this.timeLeft = 60;
+                    this.startTimer();
+                } else {
+                    this.endGame();
+                }
+            }
+
+            endGame() {
+                this.gameActive = false;
+                clearInterval(this.timer);
+                
+                if (this.recognition) {
+                    this.recognition.stop();
+                }
+                
+                // 배경음악 정지
+                this.stopBgm();
+                
+                document.getElementById('game-area').style.display = 'none';
+                document.getElementById('game-over').style.display = 'block';
+                
+                this.displayFinalScores();
+                
+                // 리더보드에 점수 추가
+                this.players.forEach(player => {
+                    const score = this.scores[player.id] || 0;
+                    this.addToLeaderboard(player.name, score);
+                });
+            }
+
+            displayFinalScores() {
+                const finalScores = document.getElementById('final-scores');
+                const sortedPlayers = this.players
+                    .map(player => ({
+                        name: player.name,
+                        score: this.scores[player.id] || 0
+                    }))
+                    .sort((a, b) => b.score - a.score);
+
+                let html = '';
+                sortedPlayers.forEach((player, index) => {
+                    const rank = index + 1;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🏅';
+                    html += `
+                        <div class="final-score-item">
+                            <div>
+                                <span class="rank rank-${rank}">${medal}</span>
+                                <span>${player.name}</span>
+                            </div>
+                            <div>${player.score}점</div>
+                        </div>
+                    `;
+                });
+                
+                finalScores.innerHTML = html;
+            }
+
+            toggleMic() {
+                if (!this.recognition) return;
+                
+                if (this.isListening) {
+                    this.recognition.stop();
+                } else {
+                    this.recognition.start();
+                }
+            }
+
+            showRecognitionResult(text) {
+                const rr = document.getElementById('recognition-result');
+                rr.textContent = `인식된 단어: ${text}`;
+            }
+
+            applyResultHighlight(isCorrect) {
+                const rr = document.getElementById('recognition-result');
+                const ct = document.getElementById('challenge-display');
+                rr.classList.remove('correct','incorrect');
+                ct.classList.remove('correct','incorrect');
+                if (isCorrect) {
+                    rr.classList.add('correct');
+                    ct.classList.add('correct');
+                } else {
+                    rr.classList.add('incorrect');
+                    ct.classList.add('incorrect');
+                }
+                // 600ms 후 효과 제거
+                setTimeout(() => {
+                    rr.classList.remove('correct','incorrect');
+                    ct.classList.remove('correct','incorrect');
+                }, 600);
+            }
+
+            async checkAnswer(answer) {
+                if (!this.gameActive) return false;
+
+                const normalized = this.normalizeWord(answer);
+                if (!normalized) return false;
+
+                // 중복 답변 체크
+                if (this.answeredWords.has(normalized)) {
+                    this.showFeedback('이미 말한 단어입니다!', 'neutral');
+                    return true;
+                }
+
+                // 초성 매칭 확인
+                if (this.matchesInitials(normalized, this.currentChallenge)) {
+                    // 정답 사전에서 실제 단어 확인
+                    const isValidAnswer = await this.isValidAnswer(normalized, this.currentChallenge);
+                    
+                    if (isValidAnswer) {
+                        // 멀티플레이어인 경우 선택된 플레이어가 없으면 득점 불가
+                        if (this.players.length > 1 && !this.selectedPlayerId) {
+                            this.showFeedback('플레이어 버튼을 먼저 눌러주세요!', 'neutral');
+                            return false;
+                        }
+
+                        const playerId = this.selectedPlayerId || 1;
+                        this.scores[playerId] = (this.scores[playerId] || 0) + 10;
+                        this.answeredWords.add(normalized);
+                        this.addAnswerToDisplay(normalized, playerId);
+                        this.updateDisplay();
+                        
+                        const playerName = this.players.find(p => p.id === playerId)?.name || '';
+                        this.showFeedback(`${playerName}님 정답! +10점 (${normalized})`, 'correct');
+                        
+                        // 정답 효과음 및 하이라이트
+                        this.playCorrectSfx();
+                        this.applyResultHighlight(true);
+                        
+                        // 선택된 플레이어 해제
+                        this.clearSelectedPlayer();
+                        return true;
+                    }
+                }
+
+                this.showFeedback('오답입니다. 다시 시도해보세요!', 'incorrect');
+                
+                // 오답 효과음 및 하이라이트
+                this.playErrorSfx();
+                this.applyResultHighlight(false);
+                // 오답 시에도 다음 답변을 위해 플레이어 선택을 해제하여 다시 선택 가능하게 함
+                this.clearSelectedPlayer();
+                return false;
+            }
+
+            async isValidAnswer(word, challenge) {
+                try {
+                    console.log(`정답 확인: "${word}" (초성: ${challenge})`);
+                    
+                    // window.ANSWER_DICT에서 해당 초성의 JSON 파일 경로 가져오기
+                    const answerDict = window.ANSWER_DICT;
+                    if (!answerDict || !answerDict[challenge]) {
+                        console.log('ANSWER_DICT를 찾을 수 없습니다.');
+                        return false;
+                    }
+
+                    const jsonPath = answerDict[challenge];
+                    console.log(`JSON 파일 로드: ${jsonPath}`);
+                    
+                    const response = await fetch(jsonPath);
+                    const data = await response.json();
+                    
+                    // 해당 초성의 단어 목록에서 확인
+                    const wordList = data[challenge] || [];
+                    const stripped = this.stripTrailingParticles(word);
+                    const candidates = stripped && stripped !== word ? [word, stripped] : [word];
+                    const isValid = candidates.some(w => wordList.includes(w));
+                    
+                    console.log(`단어 목록 길이: ${wordList ? wordList.length : 0}`);
+                    console.log(`정답 여부: ${isValid}`);
+                    
+                    return isValid;
+                } catch (error) {
+                    console.error('정답 확인 중 오류:', error);
+                    return false;
+                }
+            }
+
+            matchesInitials(word, challenge) {
+                if (!word) return false;
+                const initials = this.getInitials(word);
+                return initials.startsWith(challenge);
+            }
+
+            getInitials(word) {
+                let initials = '';
+                for (let char of word) {
+                    const code = char.charCodeAt(0);
+                    if (code >= 0xAC00 && code <= 0xD7A3) {
+                        const syllableIndex = code - 0xAC00;
+                        const choseongIndex = Math.floor(syllableIndex / 588);
+                        const initialChar = this.CHOSEONG_LIST[choseongIndex] || '';
+                        initials += initialChar;
+                    }
+                }
+                return initials;
+            }
+
+            normalizeWord(word) {
+                const onlyHangul = (word || '')
+                    .replace(/[^\p{Script=Hangul}]/gu, '')
+                    .trim();
+                return this.stripTrailingParticles(onlyHangul);
+            }
+
+            // 조사/어미 제거로 명사 원형에 가깝게 정규화
+            stripTrailingParticles(text) {
+                if (!text) return text;
+                // 다문자 조사 우선 처리
+                const multiCharParticles = [
+                    '으로써','으로서','에게서','한테서','처럼','까지','부터','이라도','이라','라도','이랑','하고','으로','에서','에게','한테','이나','거나'
+                ];
+                for (const p of multiCharParticles) {
+                    if (text.endsWith(p) && text.length > p.length + 1) {
+                        text = text.slice(0, -p.length);
+                        break;
+                    }
+                }
+                // 단문자 조사
+                const singleCharParticles = ['은','는','이','가','을','를','와','과','도','에','로','라','나','며','던','든','요','까','만'];
+                if (singleCharParticles.some(c => text.endsWith(c)) && text.length > 1) {
+                    text = text.slice(0, -1);
+                }
+                return text;
+            }
+
+            // 점수/라운드/시간/초성 표시 갱신 및 기본 텍스트 업데이트
+            updateDisplay() {
+                const cc = document.getElementById('current-challenge');
+                const cd = document.getElementById('challenge-display');
+                const tl = document.getElementById('time-left');
+                const cr = document.getElementById('current-round');
+                if (cc) cc.textContent = this.currentChallenge || '';
+                if (cd) cd.textContent = this.currentChallenge || '';
+                if (tl) tl.textContent = this.timeLeft;
+                if (cr) cr.textContent = `${this.round}/5`;
+            }
+
+            // 맞춘 단어를 화면에 추가
+            addAnswerToDisplay(answer, playerId) {
+                const answersList = document.getElementById('answers-list');
+                if (!answersList) return;
+                const item = document.createElement('div');
+                item.className = 'answer-item';
+                // 색상 구분: 플레이어별 클래스 부여
+                const playerClass = `player-${playerId}`;
+                item.classList.add(playerClass);
+                // 텍스트는 단어만 표시 (플레이어명 제거)
+                item.textContent = answer;
+                item.classList.add('pop');
+                answersList.appendChild(item);
+                setTimeout(() => item.classList.remove('pop'), 300);
+            }
+
+            // 간단 피드백 메시지 출력
+            showFeedback(message, type) {
+                const status = document.getElementById('voice-status');
+                if (status) status.textContent = message;
+            }
+
+            renderPlayerButtons() {
+                const playerClaims = document.getElementById('player-claims');
+                playerClaims.innerHTML = '';
+
+                this.players.forEach(player => {
+                    const btn = document.createElement('button');
+                    btn.className = 'claim-btn';
+                    btn.textContent = player.name;
+                    btn.addEventListener('click', () => {
+                        this.selectPlayer(player.id);
+                    });
+                    playerClaims.appendChild(btn);
+                });
+            }
+
+            selectPlayer(playerId) {
+                this.selectedPlayerId = playerId;
+                
+                // 모든 버튼에서 active 클래스 제거 및 비활성화 처리
+                document.querySelectorAll('.claim-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.disabled = true;
+                });
+                
+                // 선택된 버튼 활성/강조
+                const player = this.players.find(p => p.id === playerId);
+                const selectedBtn = Array.from(document.querySelectorAll('.claim-btn')).find(b => b.textContent === (player?.name || ''));
+                if (selectedBtn) {
+                    selectedBtn.disabled = false;
+                    selectedBtn.classList.add('active');
+                }
+                
+                if (player) {
+                    document.getElementById('voice-status').textContent = `${player.name}님, 말씀하세요!`;
+                }
+            }
+
+            clearSelectedPlayer() {
+                if (this.players.length > 1) {
+                    this.selectedPlayerId = null;
+                    document.querySelectorAll('.claim-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.disabled = false;
+                    });
+                    document.getElementById('voice-status').textContent = '플레이어 버튼을 누르고 답하세요!';
+                }
+            }
+
+            restartGame() {
+                document.getElementById('game-over').style.display = 'none';
+                document.getElementById('game-setup').style.display = 'block';
+                this.gameActive = false;
+                this.players = [];
+                this.scores = {};
+                this.selectedPlayerId = null;
+            }
+        }
+
+        // 게임 시작
+        document.addEventListener('DOMContentLoaded', () => {
+            new KoreanInitialGame();
+        });
+    </script>
+</body>
+</html>
