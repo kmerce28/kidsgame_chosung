@@ -1299,6 +1299,27 @@
                 if (cd) cd.textContent = this.currentChallenge || '';
                 if (tl) tl.textContent = this.timeLeft;
                 if (cr) cr.textContent = `${this.round}/5`;
+                
+                // 플레이어 점수 업데이트
+                this.updatePlayerScores();
+            }
+
+            // 플레이어 점수 표시 업데이트
+            updatePlayerScores() {
+                const scoresArea = document.getElementById('scores-area');
+                if (!scoresArea) return;
+                
+                scoresArea.innerHTML = '';
+                
+                this.players.forEach(player => {
+                    const scoreDiv = document.createElement('div');
+                    scoreDiv.className = 'player-score';
+                    scoreDiv.innerHTML = `
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-points">${this.scores[player.id] || 0}</div>
+                    `;
+                    scoresArea.appendChild(scoreDiv);
+                });
             }
 
             // 맞춘 단어를 화면에 추가
